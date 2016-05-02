@@ -46,8 +46,7 @@ function davcnaStopnja(izvajalec, zanr) {
 
 // Prikaz seznama pesmi na strani
 streznik.get('/', function(zahteva, odgovor) {
-  if(zahteva.session.stranka!= undefined && zahteva.session.stranka!=null){
-    console.log("spustil sem naprej. vrednost: "+ zahteva.session.stranka);
+  if(zahteva.session.stranka!= null && zahteva.session.stranka!= undefined){
     pb.all("SELECT Track.TrackId AS id, Track.Name AS pesem, \
             Artist.Name AS izvajalec, Track.UnitPrice * " +
             razmerje_usd_eur + " AS cena, \
@@ -68,7 +67,6 @@ streznik.get('/', function(zahteva, odgovor) {
             vrstice[i].stopnja = davcnaStopnja(vrstice[i].izvajalec, vrstice[i].zanr);
           odgovor.render('seznam', {seznamPesmi: vrstice});
         }
-  
     })
   }else{
     odgovor.redirect("/prijava");
@@ -238,7 +236,12 @@ streznik.post('/stranka', function(zahteva, odgovor) {
   var form = new formidable.IncomingForm();
   
   form.parse(zahteva, function (napaka1, polja, datoteke) {
-        zahteva.session.stranka=polja.seznamStrank;
+        if(polja.seznamStrank!=null){
+          zahteva.session.stranka=true;
+        }
+        else{
+          zahteva.session.stranka=null;
+        }
       odgovor.redirect('/');
 
   });
