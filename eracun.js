@@ -136,8 +136,8 @@ var pesmiIzRacuna = function(racunId, callback) {
       //console.log(vrstice);
       if(napaka){
         callback(null);
-      }else callback(vrstice[0]);
-    })
+      }else callback(vrstice);
+    });
     
 }
 
@@ -148,8 +148,8 @@ var strankaIzRacuna = function(racunId, callback) {
     function(napaka, vrstice) {
       //console.log(vrstice);
       if(napaka)callback(null);
-      else callback(vrstice[0])
-    })
+      else callback(vrstice[0]);
+    });
 }
 
 
@@ -159,9 +159,10 @@ streznik.post('/izpisiRacunBaza', function(zahteva, odgovor) {
  form.parse(zahteva, function (napaka1, polja, datoteke) {
    var racun_id = polja.seznamRacunov;
    //console.log("id: "+racun_id);
-   strankaIzRacuna(polja.seznamRacunov,function(stranka){
-     pesmiIzRacuna(polja.seznamRacunov,function(pesmi){
+   strankaIzRacuna(racun_id,function(stranka){
+     pesmiIzRacuna(racun_id,function(pesmi){
        //console.log(stranka.FirstName);
+       //console.log(pesmi);
        odgovor.setHeader('content-type', 'text/xml');
         odgovor.render('eslog', {
             vizualiziraj: true,
