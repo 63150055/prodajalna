@@ -136,8 +136,16 @@ var pesmiIzRacuna = function(racunId, callback) {
     Track.TrackId IN (SELECT InvoiceLine.TrackId FROM InvoiceLine, Invoice \
     WHERE InvoiceLine.InvoiceId = Invoice.InvoiceId AND Invoice.InvoiceId = " + racunId + ")",
     function(napaka, vrstice) {
-      console.log(vrstice);
-    })
+      if(napaka){
+        callback(null);
+      }else {
+        for (var i=0; i<vrstice.length; i++) {
+          vrstice[i].stopnja = davcnaStopnja((vrstice[i].opisArtikla.split(' (')[1]).split(')')[0], vrstice[i].zanr);
+        }
+        callback(vrstice);
+      }
+    });
+    
 }
 
 // Vrni podrobnosti o stranki iz računa
@@ -145,14 +153,44 @@ var strankaIzRacuna = function(racunId, callback) {
     pb.all("SELECT Customer.* FROM Customer, Invoice \
             WHERE Customer.CustomerId = Invoice.CustomerId AND Invoice.InvoiceId = " + racunId,
     function(napaka, vrstice) {
-      console.log(vrstice);
-    })
+      //console.log(vrstice);
+      if(napaka)callback(null);
+      else callback(vrstice[0]);
+    });
 }
+
 
 // Izpis računa v HTML predstavitvi na podlagi podatkov iz baze
 streznik.post('/izpisiRacunBaza', function(zahteva, odgovor) {
-  odgovor.end();
+ var form = new formidable.IncomingForm();
+ form.parse(zahteva, function (napaka1, polja, datoteke) {
+   var racun_id = polja.seznamRacunov;
+   //console.log("id: "+racun_id);
+   strankaIzRacuna(racun_id,function(stranka){
+     pesmiIzRacuna(racun_id,function(pesmi){
+       //console.log(stranka.FirstName);
+       //console.log(pesmi);
+       odgovor.setHeader('content-type', 'text/xml');
+        odgovor.render('eslog', {
+            vizualiziraj: true,
+            postavkeRacuna: pesmi,
+            FirstName: stranka.FirstName,
+            LastName: stranka.LastName,
+            Company: stranka.Company,
+            Address: stranka.Address,
+            City: stranka.City,
+            Country: stranka.Country,
+            PostalCode: stranka.PostalCode,
+            Phone: stranka.Phone,
+            Fax: stranka.Fax,
+            Email: stranka.Email
+        });
+      });
+    });
+ });
 })
+
+
 
 // Izpis računa v HTML predstavitvi ali izvorni XML obliki
 streznik.get('/izpisiRacun/:oblika', function(zahteva, odgovor) {
