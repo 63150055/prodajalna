@@ -220,7 +220,6 @@ streznik.post('/prijava', function(zahteva, odgovor) {
       sporocilo_o_registraciji="Stranka je bila uspešno registrirana";
     }
     odgovor.redirect('/prijava');
-    odgovor.end();
   });
 })
 
