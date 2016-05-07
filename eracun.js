@@ -26,6 +26,7 @@ streznik.use(
   })
 );
 var razmerje_usd_eur = 0.877039116;
+var izbrana_stranka;
 
 function davcnaStopnja(izvajalec, zanr) {
   switch (izvajalec) {
@@ -190,24 +191,52 @@ streznik.post('/izpisiRacunBaza', function(zahteva, odgovor) {
  });
 })
 
+<<<<<<< HEAD
 
+=======
+// Vrni podrobnosti o stranki iz računa
+var stranka_z_Id = function(strankaId,callback) {
+    pb.all("SELECT Customer.* FROM Customer, Invoice \
+            WHERE Customer.CustomerId = " + strankaId,
+    function(napaka, vrstice) {
+      //console.log(vrstice[0].FirstName+"v funkciji");
+      if(napaka)callback(null);
+      else callback(vrstice[0]);
+    })
+}
+>>>>>>> prikaz-racuna-trenutni
 
 // Izpis računa v HTML predstavitvi ali izvorni XML obliki
 streznik.get('/izpisiRacun/:oblika', function(zahteva, odgovor) {
-  pesmiIzKosarice(zahteva, function(pesmi) {
+  stranka_z_Id(izbrana_stranka,function(stranka){
+    pesmiIzKosarice(zahteva, function(pesmi) {
     if (!pesmi) {
       odgovor.sendStatus(500);
     } else if (pesmi.length == 0) {
       odgovor.send("<p>V košarici nimate nobene pesmi, \
         zato računa ni mogoče pripraviti!</p>");
-    } else {
+    }else if(zahteva.session.stranka == null || zahteva.session.stranka == undefined){ 
+      odgovor.redirect('/prijava');
+    }else {
       odgovor.setHeader('content-type', 'text/xml');
       odgovor.render('eslog', {
         vizualiziraj: zahteva.params.oblika == 'html' ? true : false,
-        postavkeRacuna: pesmi
-      })  
-    }
-  })
+        postavkeRacuna: pesmi,
+        FirstName: stranka.FirstName,
+        LastName: stranka.LastName,
+        Company: stranka.Company,
+        Address: stranka.Address,
+        City: stranka.City,
+        Country: stranka.Country,
+        PostalCode: stranka.PostalCode,
+        Phone: stranka.Phone,
+        Fax: stranka.Fax,
+        Email: stranka.Email
+      });
+      }
+    });
+  });
+   
 })
 
 // Privzeto izpiši račun v HTML obliki
@@ -278,21 +307,23 @@ streznik.post('/stranka', function(zahteva, odgovor) {
   var form = new formidable.IncomingForm();
   
   form.parse(zahteva, function (napaka1, polja, datoteke) {
-        if(polja.seznamStrank!=null){
-          zahteva.session.stranka=true;
-        }
-        else{
-          zahteva.session.stranka=null;
-        }
-      odgovor.redirect('/');
-
+    izbrana_stranka = polja.seznamStrank;
+    //console.log("izbrana id: "+izbrana_stranka);
+    if(polja.seznamStrank!=null){
+      zahteva.session.stranka=true;
+    }
+    else{
+      zahteva.session.stranka=null;
+    }
+    odgovor.redirect('/')
   });
 })
 
 // Odjava stranke
 streznik.post('/odjava', function(zahteva, odgovor) {
+    izbrana_stranka=null;
     zahteva.session.stranka=null;
-    odgovor.redirect('/');
+    odgovor.redirect('/prijava') 
 })
 
 
