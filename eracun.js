@@ -191,9 +191,6 @@ streznik.post('/izpisiRacunBaza', function(zahteva, odgovor) {
  });
 })
 
-<<<<<<< HEAD
-
-=======
 // Vrni podrobnosti o stranki iz računa
 var stranka_z_Id = function(strankaId,callback) {
     pb.all("SELECT Customer.* FROM Customer, Invoice \
@@ -204,7 +201,6 @@ var stranka_z_Id = function(strankaId,callback) {
       else callback(vrstice[0]);
     })
 }
->>>>>>> prikaz-racuna-trenutni
 
 // Izpis računa v HTML predstavitvi ali izvorni XML obliki
 streznik.get('/izpisiRacun/:oblika', function(zahteva, odgovor) {
