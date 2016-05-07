@@ -165,9 +165,7 @@ var stranka_z_Id = function(strankaId,callback) {
 
 // Izpis računa v HTML predstavitvi ali izvorni XML obliki
 streznik.get('/izpisiRacun/:oblika', function(zahteva, odgovor) {
-  //console.log(zahteva.session.stranka);
   stranka_z_Id(izbrana_stranka,function(stranka){
-    //console.log(stranka.FirstName+ "v izpisu");
     pesmiIzKosarice(zahteva, function(pesmi) {
     if (!pesmi) {
       odgovor.sendStatus(500);
